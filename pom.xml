@@ -9,6 +9,15 @@
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
 
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <carbon.identity.framework.version>7.8.23</carbon.identity.framework.version>
+        <carbon.identity.framework.version.range>[5.14.67, 8.0.0]</carbon.identity.framework.version.range>
+        <carbon.kernel.version>4.10.42</carbon.kernel.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -36,7 +45,6 @@
             <!--            <scope>provided</scope>-->
         </dependency>
 
-
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.core</artifactId>
@@ -45,15 +53,11 @@
         </dependency>
 
 
-
         <dependency>
             <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
             <artifactId>org.wso2.carbon.identity.oauth</artifactId>
             <version>5.6.65</version>
         </dependency>
-
-
-
 
         <dependency>
             <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
@@ -61,25 +65,14 @@
             <version>7.0.275</version>
         </dependency>
 
-
-
         <dependency>
             <groupId>org.apache.oltu.oauth2</groupId>
             <artifactId>org.apache.oltu.oauth2.common</artifactId>
             <version>1.0.2</version>
         </dependency>
-    </dependencies>
+        </dependencies>
 
-    <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <carbon.identity.framework.version>7.8.23</carbon.identity.framework.version>
-        <carbon.identity.framework.version.range>[5.14.67, 8.0.0]</carbon.identity.framework.version.range>
-        <carbon.kernel.version>4.10.42</carbon.kernel.version>
-    </properties>
-
-   <build>
+    <build>
 
     <pluginManagement>
         <plugins>

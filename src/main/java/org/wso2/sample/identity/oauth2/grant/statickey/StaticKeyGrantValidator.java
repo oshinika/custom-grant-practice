@@ -30,6 +30,4 @@ public class StaticKeyGrantValidator extends AbstractValidator<HttpServletReques
             throw OAuthProblemException.error(OAuthError.CodeResponse.INVALID_REQUEST, "Content type not supported: " + contentType);
         }
     }
-
-
 }

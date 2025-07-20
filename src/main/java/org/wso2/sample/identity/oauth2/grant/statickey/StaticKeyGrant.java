@@ -2,7 +2,6 @@ package org.wso2.sample.identity.oauth2.grant.statickey;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.RequestParameter;
@@ -12,17 +11,16 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class StaticKeyGrant extends AbstractAuthorizationGrantHandler {
 
-    public static final String CUSTOM_GRANT_TYPE_IDENTIFIER = "urn:example:params:oauth:grant-type:static_key";
+    public static final String CUSTOM_GRANT_TYPE_IDENTIFIER = "grant-type:static_key";
     private static final Log log = LogFactory.getLog(StaticKeyGrant.class);
-    private static final String STATIC_KEY_PARAM = "static_key";
+    public static final String STATIC_KEY_PARAM = "static_key";
     private static final String VALID_STATIC_KEY = "my_practice_key";
     private static final String AUTH_USER_NAME = "admin";
     private static final String AUTH_TENANT_DOMAIN = "carbon.super";
 
 
     @Override
-    public boolean validateGrant(OAuthTokenReqMessageContext oAuthTokenReqMessageContext) throws IdentityOAuth2Exception{
-
+    public boolean validateGrant(OAuthTokenReqMessageContext oAuthTokenReqMessageContext) throws IdentityOAuth2Exception {
         log.info("Static Key Grant Handler hit for validateGrant()");
         super.validateGrant(oAuthTokenReqMessageContext);
 
@@ -81,6 +79,12 @@ public class StaticKeyGrant extends AbstractAuthorizationGrantHandler {
         return true;
     }
 
+
+    @Override
+    public boolean issueRefreshToken() throws IdentityOAuth2Exception {
+        // Explicitly allow refresh tokens for this custom grant type.
+        return true;
+    }
 
 }
 
