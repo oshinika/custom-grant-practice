@@ -1,5 +1,7 @@
 package org.wso2.sample.identity.oauth2.grant.statickey;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
@@ -8,16 +10,17 @@ import javax.servlet.http.HttpServletRequest;
 
 public class StaticKeyGrantValidator extends AbstractValidator<HttpServletRequest> {
 
+    private static final Log log = LogFactory.getLog(StaticKeyGrantValidator.class);
+
     public StaticKeyGrantValidator() {
-        requiredParams.add("static_key");
-        requiredParams.add(OAuth.OAUTH_CLIENT_ID);
+
     }
 
     @Override
     public void validateMethod(HttpServletRequest request) throws OAuthProblemException {
         String method = request.getMethod();
-
         if (!OAuth.HttpMethod.POST.equals(method)) {
+            log.warn("Invalid HTTP method: '" + method + "'. Expected: POST.");
             throw OAuthProblemException.error(OAuthError.CodeResponse.INVALID_REQUEST, "Method not supported: " + method);
         }
     }
@@ -26,8 +29,16 @@ public class StaticKeyGrantValidator extends AbstractValidator<HttpServletReques
     public void validateContentType(HttpServletRequest request) throws OAuthProblemException {
         String contentType = request.getContentType();
 
-        if (!OAuth.ContentType.URL_ENCODED.equals(contentType)) {
-            throw OAuthProblemException.error(OAuthError.CodeResponse.INVALID_REQUEST, "Content type not supported: " + contentType);
+        if (!"application/json".equals(contentType)) {
+            log.warn("Invalid content type: '" + contentType + "'. Expected: application/json.");
+            throw OAuthProblemException.error(OAuthError.CodeResponse.INVALID_REQUEST, "Content type not supported: " + contentType + ". Expected: application/json.");
+        }
+    }
+
+    @Override
+    public void validateRequiredParameters(HttpServletRequest request) throws OAuthProblemException {
+        if (log.isDebugEnabled()) {
+            log.debug("StaticKeyGrantValidator: Skipping specific parameter validation as request is JSON.");
         }
     }
 }
