@@ -6,50 +6,82 @@
 
     <groupId>org.wso2.sample.identity.oauth2.grant</groupId>
     <artifactId>static-key-grant-type</artifactId>
-    <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <packaging>bundle</packaging> <version>1.0-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <carbon.identity.framework.version>7.8.23</carbon.identity.framework.version>
-        <carbon.identity.framework.version.range>[5.14.67, 8.0.0]</carbon.identity.framework.version.range>
         <carbon.kernel.version>4.10.42</carbon.kernel.version>
-    </properties>
+
+        <osgi.framework.imp.pkg.version.range>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version.range>
+        <osgi.service.component.imp.pkg.version.range>[1.0.0, 2.0.0)</osgi.service.component.imp.pkg.version.range>
+
+        <maven.bundle.plugin.version>3.5.1</maven.bundle.plugin.version>
+        <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version> </properties>
 
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
-            <version>3.0-alpha-1</version>
-            <scope>provided</scope>
+            <version>3.0-alpha-1</version> <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.core</artifactId>
             <version>${carbon.identity.framework.version}</version>
+            <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.application.common</artifactId>
             <version>${carbon.identity.framework.version}</version>
+            <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.application.authentication.framework</artifactId>
             <version>${carbon.identity.framework.version}</version>
-            <!--            <scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.core</artifactId>
             <version>${carbon.kernel.version}</version>
-            <!--            <scope>provided</scope>-->
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.user.api</artifactId>
+            <version>${carbon.kernel.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
+            <artifactId>org.wso2.carbon.identity.oauth</artifactId>
+            <version>5.6.65</version> <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
+            <artifactId>org.wso2.carbon.identity.oauth.common</artifactId>
+            <version>7.0.275</version> <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.oltu.oauth2</groupId>
+            <artifactId>org.apache.oltu.oauth2.common</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.oltu.oauth2</groupId>
+            <artifactId>org.apache.oltu.oauth2.common</artifactId>
+            <version>1.0.2</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -69,130 +101,128 @@
         </dependency>
 
         <dependency>
-            <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
-            <artifactId>org.wso2.carbon.identity.oauth</artifactId>
-            <version>5.6.65</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.wso2.carbon.identity.inbound.auth.oauth2</groupId>
-            <artifactId>org.wso2.carbon.identity.oauth.common</artifactId>
-            <version>7.0.275</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.oltu.oauth2</groupId>
-            <artifactId>org.apache.oltu.oauth2.common</artifactId>
-            <version>1.0.2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.component.annotations</artifactId>
+            <version>1.4.0</version>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>9.0.1.Final</version> </dependency>
+            <version>6.2.0.Final</version> </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>2.0.2</version> </dependency>
+        <dependency>
+            <groupId>org.glassfish.expressly</groupId>
+            <artifactId>expressly</artifactId>
+            <version>6.0.0</version> </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
+        </dependency>
+
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
             <version>3.1.1</version> </dependency>
-        <dependency>
-            <groupId>org.glassfish.expressly</groupId>
-            <artifactId>expressly</artifactId>
-            <version>6.0.0</version>
-        </dependency>
 
     </dependencies>
 
     <build>
-
-    <pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>3.2.0</version>
-                <extensions>true</extensions>
+                <version>${maven.bundle.plugin.version}</version> <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>${project.artifactId}</Bundle-Name>
+                        <Private-Package>org.wso2.sample.identity.oauth2.grant.statickey.internal.*</Private-Package>
+                        <Export-Package>
+                            org.wso2.sample.identity.oauth2.grant.statickey;version="${project.version}"
+                        </Export-Package>
+                        <Import-Package>
+                            org.osgi.framework;version="${osgi.framework.imp.pkg.version.range}",
+                            org.osgi.service.component.annotations;version="${osgi.service.component.imp.pkg.version.range}",
+                            org.osgi.service.component;version="${osgi.service.component.imp.pkg.version.range}",
+                            org.wso2.carbon.user.core.service;resolution:=mandatory, org.wso2.carbon.user.api;resolution:=mandatory,
+                            org.wso2.carbon.user.core;resolution:=mandatory,
+                            org.wso2.carbon.identity.application.authentication.framework;resolution:=mandatory,
+                            org.wso2.carbon.identity.application.common.*;resolution:=mandatory,
+                            org.wso2.carbon.identity.core.util;resolution:=mandatory,
+                            org.wso2.carbon.identity.oauth2.*;resolution:=mandatory,
+                            org.wso2.carbon.identity.base.*;resolution:=mandatory,
+                            org.wso2.carbon.utils.multitenancy;resolution:=mandatory,
+                            org.apache.commons.logging;resolution:=mandatory,
+                            com.fasterxml.jackson.databind;resolution:=mandatory,
+                            com.fasterxml.jackson.core.*;resolution:=mandatory,
+                            jakarta.validation.*;resolution:=optional,
+                            org.hibernate.validator.*;resolution:=optional,
+                            org.apache.oltu.oauth2.common.*;resolution:=mandatory,
+                            javax.servlet.*;resolution:=optional,
+                            org.wso2.carbon.identity.oauth2;version="[5.6.0,8.0.0)"
+                            * </Import-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
+                    </instructions>
+                </configuration>
             </plugin>
-        </plugins>
-    </pluginManagement>
-    <plugins>
-        <!-- Bundle Plugin -->
-        <plugin>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>maven-bundle-plugin</artifactId>
-            <extensions>true</extensions>
-            <configuration>
-                <instructions>
-                    <Bundle-SymbolicName>org.wso2.carbon.identity.sample.authenticator</Bundle-SymbolicName>
-                    <Bundle-Name>Sample Authenticator</Bundle-Name>
-                    <Private-Package>org.wso2.carbon.identity.sample.local.authenticator.internal</Private-Package>
-                    <Export-Package>
-                        !org.wso2.sample.identity.oauth2.grant.statickey,
-                        org.wso2.sample.identity.oauth2.grant.statickey*; version="${project.version}"
-                    </Export-Package>
-                    <Import-Package>
-                        *
-                    </Import-Package>
-                    <DynamicImport-Package>*</DynamicImport-Package>
-                </instructions>
-            </configuration>
-
-        </plugin>
-        <!-- Compiler Plugin -->
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>2.3.1</version>
-            <inherited>true</inherited>
-            <configuration>
-                <encoding>UTF-8</encoding>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version> <configuration>
+                <encoding>${project.build.sourceEncoding}</encoding>
                 <source>${maven.compiler.source}</source>
                 <target>${maven.compiler.target}</target>
             </configuration>
-        </plugin>
-    </plugins>
-</build>
+            </plugin>
+        </plugins>
+    </build>
 
-<repositories>
-<repository>
-    <id>wso2-nexus3</id>
-    <name>WSO2 internal Repository</name>
-    <url>https://maven.wso2.org/nexus/content/groups/wso2-public/</url>
-    <releases>
-        <enabled>true</enabled>
-        <updatePolicy>daily</updatePolicy>
-        <checksumPolicy>ignore</checksumPolicy>
-    </releases>
-</repository>
-<repository>
-    <id>wso2.releases</id>
-    <name>WSO2 internal Repository</name>
-    <url>https://maven.wso2.org/nexus/content/repositories/releases/</url>
-    <releases>
-        <enabled>true</enabled>
-        <updatePolicy>daily</updatePolicy>
-        <checksumPolicy>ignore</checksumPolicy>
-    </releases>
-</repository>
-<repository>
-    <id>wso2.snapshots</id>
-    <name>Apache Snapshot Repository</name>
-    <url>https://maven.wso2.org/nexus/content/repositories/snapshots/</url>
-    <snapshots>
-        <enabled>true</enabled>
-        <updatePolicy>daily</updatePolicy>
-    </snapshots>
-    <releases>
-        <enabled>false</enabled>
-    </releases>
-</repository>
-</repositories>
+    <repositories>
+        <repository>
+            <id>wso2-nexus3</id>
+            <name>WSO2 internal Repository</name>
+            <url>https://maven.wso2.org/nexus/content/groups/wso2-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+        <repository>
+            <id>wso2.releases</id>
+            <name>WSO2 internal Repository</name>
+            <url>https://maven.wso2.org/nexus/content/repositories/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+        <repository>
+            <id>wso2.snapshots</id>
+            <name>Apache Snapshot Repository</name>
+            <url>https://maven.wso2.org/nexus/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
 
 </project>
