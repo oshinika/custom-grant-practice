@@ -87,8 +87,6 @@ public class StaticKeyGrant extends AbstractAuthorizationGrantHandler {
                 log.error(msg);
                 throw new AuthenticationFailedException(msg);
             }
-
-
             String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
 
             boolean userExists = userRealm.getUserStoreManager().isExistingUser(tenantAwareUsername);

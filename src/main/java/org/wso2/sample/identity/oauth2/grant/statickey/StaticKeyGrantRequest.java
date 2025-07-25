@@ -12,7 +12,7 @@ public class StaticKeyGrantRequest {
 
     public StaticKeyGrantRequest(String authCode, String username, String cifNo, String omniId,
                                  String stanId, String mobileNo, String authType, String authDescription) {
-        this.authCode = authCode; // <-- These lines were missing or incorrect
+        this.authCode = authCode;
         this.username = username;
         this.cifNo = cifNo;
         this.omniId = omniId;
