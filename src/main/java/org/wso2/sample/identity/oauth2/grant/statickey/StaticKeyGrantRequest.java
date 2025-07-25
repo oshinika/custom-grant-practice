@@ -10,6 +10,24 @@ public class StaticKeyGrantRequest {
     private String authType;
     private String authDescription;
 
+    public StaticKeyGrantRequest(String authCode, String username, String cifNo, String omniId,
+                                 String stanId, String mobileNo, String authType, String authDescription) {
+        this.authCode = authCode; // <-- These lines were missing or incorrect
+        this.username = username;
+        this.cifNo = cifNo;
+        this.omniId = omniId;
+        this.stanId = stanId;
+        this.mobileNo = mobileNo;
+        this.authType = authType;
+        this.authDescription = authDescription;
+    }
+
+   /* public StaticKeyGrantRequest(String myJsonSecretKey, String testuser, String number, String omniAbc789, String stanXyz456, String number1, String otpLogin, String mobileOtpVerifiedLogin) {
+    }*/
+   public StaticKeyGrantRequest() {
+       // No arguments, no logic needed inside for basic deserialization
+   }
+
 
     public String getAuthCode() { return authCode; }
     public void setAuthCode(String authCode) { this.authCode = authCode; }

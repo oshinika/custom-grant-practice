@@ -187,6 +187,15 @@
                 <target>${maven.compiler.target}</target>
             </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <mainClass>org.wso2.sample.identity.oauth2.grant.statickey.BeeceptorClient</mainClass>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

@@ -1,5 +1,3 @@
-
-
 package org.wso2.sample.identity.oauth2.grant.statickey;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
