@@ -22,10 +22,8 @@ public class StaticKeyGrantRequest {
         this.authDescription = authDescription;
     }
 
-   /* public StaticKeyGrantRequest(String myJsonSecretKey, String testuser, String number, String omniAbc789, String stanXyz456, String number1, String otpLogin, String mobileOtpVerifiedLogin) {
-    }*/
    public StaticKeyGrantRequest() {
-       // No arguments, no logic needed inside for basic deserialization
+
    }
 
 
@@ -53,17 +51,4 @@ public class StaticKeyGrantRequest {
     public String getAuthDescription() { return authDescription; }
     public void setAuthDescription(String authDescription) { this.authDescription = authDescription; }
 
-    @Override
-    public String toString() {
-        return "StaticKeyGrantRequest{" +
-                "authCode='" + authCode + '\'' +
-                ", username='" + username + '\'' +
-                ", cifNo='" + cifNo + '\'' +
-                ", omniId='" + omniId + '\'' +
-                ", stanId='" + stanId + '\'' +
-                ", mobileNo='" + mobileNo + '\'' +
-                ", authType='" + authType + '\'' +
-                ", authDescription='" + authDescription + '\'' +
-                '}';
-    }
 }

@@ -14,114 +14,110 @@ import org.wso2.carbon.identity.oauth2.token.handlers.grant.AbstractAuthorizatio
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.json.JSONObject;
+
+import java.io.IOException;
 
 public class StaticKeyGrant extends AbstractAuthorizationGrantHandler {
 
     private static final Log log = LogFactory.getLog(StaticKeyGrant.class);
     public static final String CUSTOM_GRANT_TYPE_IDENTIFIER = "static_key";
     private static final String VALID_STATIC_KEY = "my_json_secret_key";
-
-    @Override
-    public void init() throws IdentityOAuth2Exception {
-        super.init();
-        log.info("StaticKeyGrant initialized.");
-    }
+    private static final String EXTERNAL_SERVICE_URL = "https://static-key.free.beeceptor.com";
 
     @Override
     public boolean validateGrant(OAuthTokenReqMessageContext context) throws IdentityOAuth2Exception {
-        log.info("Static Key Grant Handler hit");
+        try {
+            StaticKeyGrantRequest grantRequest = parseAndValidateRequest(context);
 
+            validateUserExists(grantRequest.getUsername());
+
+            validateWithExternalService(grantRequest);
+
+            setAuthenticatedUser(context, grantRequest.getUsername());
+
+            return true;
+        } catch (IdentityOAuth2Exception e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error: " + e.getMessage(), e);
+            throw new IdentityOAuth2Exception("Validation error: " + e.getMessage());
+        }
+    }
+
+    private StaticKeyGrantRequest parseAndValidateRequest(OAuthTokenReqMessageContext context)
+            throws Exception {
         RequestParameter[] parameters = context.getOauth2AccessTokenReqDTO().getRequestParameters();
-
         if (parameters == null || parameters.length == 0) {
-            String msg = "No request parameters found. Expected JSON body in 'data' parameter.";
-            log.error(msg);
-            throw new IdentityOAuth2Exception(msg);
+            throw new IdentityOAuth2Exception("No request parameters found");
         }
 
-        String dataJson = null;
+        String jsonData = null;
         for (RequestParameter param : parameters) {
-            if ("data".equals(param.getKey()) && param.getValue() != null && param.getValue().length == 1) {
-                dataJson = param.getValue()[0];
-                log.debug("Found 'data' parameter in request: " + dataJson);
+            if ("data".equals(param.getKey()) && param.getValue() != null && param.getValue().length > 0) {
+                jsonData = param.getValue()[0];
                 break;
             }
         }
 
-        if (dataJson == null || dataJson.trim().isEmpty()) {
-            String msg = "'data' JSON parameter is missing or empty.";
-            log.error(msg);
-            throw new IdentityOAuth2Exception(msg);
+        if (jsonData == null) {
+            throw new IdentityOAuth2Exception("Missing 'data' parameter");
         }
 
-        ObjectMapper mapper = new ObjectMapper();
-        StaticKeyGrantRequest grantRequest;
-        try {
-            log.debug("Trying to convert JSON to Java object: " + dataJson);
-            grantRequest = mapper.readValue(dataJson, StaticKeyGrantRequest.class);
-            log.debug("JSON successfully converted. AuthCode: " + grantRequest.getAuthCode() + ", Username: " + grantRequest.getUsername());
-        } catch (Exception e) {
-            String msg = "Failed to understand the JSON you sent: " + e.getMessage();
-            log.error(msg, e);
-            throw new IdentityOAuth2Exception(msg);
-        }
+        StaticKeyGrantRequest grantRequest = new ObjectMapper().readValue(jsonData, StaticKeyGrantRequest.class);
 
         if (!VALID_STATIC_KEY.equals(grantRequest.getAuthCode())) {
-            String msg = "Invalid static key.";
-            log.warn(msg);
-            throw new IdentityOAuth2Exception(msg);
+            throw new IdentityOAuth2Exception("Invalid static key");
         }
 
-        String username = grantRequest.getUsername();
-        if (username == null || username.trim().isEmpty()) {
-            String msg = "Username missing in JSON.";
-            log.error(msg);
-            throw new IdentityOAuth2Exception(msg);
+        if (grantRequest.getUsername() == null || grantRequest.getUsername().trim().isEmpty()) {
+            throw new IdentityOAuth2Exception("Username is required");
         }
 
-        try {
+        return grantRequest;
+    }
 
-            UserRealm userRealm = CarbonContext.getThreadLocalCarbonContext().getUserRealm();
-            if (userRealm == null) {
-                String msg = "UserRealm not available in CarbonContext.";
-                log.error(msg);
-                throw new AuthenticationFailedException(msg);
-            }
-            String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
+    private void validateUserExists(String username) throws Exception {
+        UserRealm userRealm = CarbonContext.getThreadLocalCarbonContext().getUserRealm();
+        if (userRealm == null) {
+            throw new AuthenticationFailedException("Unable to access user realm");
+        }
 
-            boolean userExists = userRealm.getUserStoreManager().isExistingUser(tenantAwareUsername);
-            if (!userExists) {
-                String msg = "User '" + tenantAwareUsername + "' not found.";
-                log.warn(msg);
-                throw new IdentityOAuth2Exception(msg);
-            }
-
-            AuthenticatedUser authenticatedUser = AuthenticatedUser.createLocalAuthenticatedUserFromSubjectIdentifier(tenantAwareUsername);
-            context.setAuthorizedUser(authenticatedUser);
-
-            return true;
-
-        } catch (UserStoreException e) {
-            log.error("UserStoreException during user existence check.", e);
-            throw new IdentityOAuth2Exception("Error accessing user store.", e);
-        } catch (Exception e) {
-            log.error("Unexpected error during user validation.", e);
-            throw new IdentityOAuth2Exception("Unexpected user validation error.", e);
+        String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
+        if (!userRealm.getUserStoreManager().isExistingUser(tenantAwareUsername)) {
+            throw new UserStoreException("User not found");
         }
     }
 
-    @Override
-    public boolean validateScope(OAuthTokenReqMessageContext tokReqCtx) {
-        return true;
+    private void validateWithExternalService(StaticKeyGrantRequest request) throws Exception {
+        String requestJson = String.format(
+                "{\"authCode\":\"%s\",\"username\":\"%s\"}",
+                request.getAuthCode(),
+                request.getUsername()
+        );
+
+        log.info("Calling external service with: " + requestJson);
+        String response = HttpClientUtil.callExternalService(
+                EXTERNAL_SERVICE_URL,
+                requestJson,
+                "application/json"
+        );
+        log.info("External service response" );
+
+        JSONObject jsonResponse = new JSONObject(response);
+        if (!"success".equalsIgnoreCase(jsonResponse.optString("status"))) {
+            throw new IdentityOAuth2Exception("External validation failed. Response: ");
+        }
     }
 
-    @Override
-    public boolean isOfTypeApplicationUser() {
-        return true;
+    private void setAuthenticatedUser(OAuthTokenReqMessageContext context, String username) {
+        AuthenticatedUser authenticatedUser = AuthenticatedUser.createLocalAuthenticatedUserFromSubjectIdentifier(
+                MultitenantUtils.getTenantAwareUsername(username)
+        );
+        context.setAuthorizedUser(authenticatedUser);
     }
 
-    @Override
-    public boolean issueRefreshToken() {
-        return true;
-    }
+    @Override public boolean validateScope(OAuthTokenReqMessageContext tokReqCtx) { return true; }
+    @Override public boolean isOfTypeApplicationUser() { return true; }
+    @Override public boolean issueRefreshToken() { return true; }
 }
