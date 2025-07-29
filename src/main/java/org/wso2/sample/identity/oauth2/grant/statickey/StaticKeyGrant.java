@@ -90,27 +90,6 @@ public class StaticKeyGrant extends AbstractAuthorizationGrantHandler {
         }
     }
 
-//    private void validateWithExternalService(StaticKeyGrantRequest request) throws Exception {
-//        String requestJson = String.format(
-//                "{\"authCode\":\"%s\",\"username\":\"%s\"}",
-//                request.getAuthCode(),
-//                request.getUsername()
-//        );
-//
-//        log.info("Calling external service with: " + requestJson);
-//        String response = HttpClientUtil.callExternalService(
-//                EXTERNAL_SERVICE_URL,
-//                requestJson,
-//                "application/json"
-//        );
-//        log.info("External service response" );
-//
-//        JSONObject jsonResponse = new JSONObject(response);
-//        if (!"success".equalsIgnoreCase(jsonResponse.optString("status"))) {
-//            throw new IdentityOAuth2Exception("External validation failed. Response: ");
-//        }
-//    }
-
     private void validateWithExternalService(StaticKeyGrantRequest request) throws Exception {
         String requestJson = String.format(
                 "{\"authCode\":\"%s\",\"username\":\"%s\"}",
