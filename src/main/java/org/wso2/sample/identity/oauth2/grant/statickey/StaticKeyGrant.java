@@ -15,6 +15,7 @@ import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.json.JSONObject;
+import java.util.concurrent.*;
 
 import java.io.IOException;
 
@@ -23,7 +24,7 @@ public class StaticKeyGrant extends AbstractAuthorizationGrantHandler {
     private static final Log log = LogFactory.getLog(StaticKeyGrant.class);
     public static final String CUSTOM_GRANT_TYPE_IDENTIFIER = "static_key";
     private static final String VALID_STATIC_KEY = "my_json_secret_key";
-    private static final String EXTERNAL_SERVICE_URL = "https://static-key.free.beeceptor.com";
+    static final String EXTERNAL_SERVICE_URL = "https://static-key.free.beeceptor.com";
 
     @Override
     public boolean validateGrant(OAuthTokenReqMessageContext context) throws IdentityOAuth2Exception {
@@ -89,6 +90,27 @@ public class StaticKeyGrant extends AbstractAuthorizationGrantHandler {
         }
     }
 
+//    private void validateWithExternalService(StaticKeyGrantRequest request) throws Exception {
+//        String requestJson = String.format(
+//                "{\"authCode\":\"%s\",\"username\":\"%s\"}",
+//                request.getAuthCode(),
+//                request.getUsername()
+//        );
+//
+//        log.info("Calling external service with: " + requestJson);
+//        String response = HttpClientUtil.callExternalService(
+//                EXTERNAL_SERVICE_URL,
+//                requestJson,
+//                "application/json"
+//        );
+//        log.info("External service response" );
+//
+//        JSONObject jsonResponse = new JSONObject(response);
+//        if (!"success".equalsIgnoreCase(jsonResponse.optString("status"))) {
+//            throw new IdentityOAuth2Exception("External validation failed. Response: ");
+//        }
+//    }
+
     private void validateWithExternalService(StaticKeyGrantRequest request) throws Exception {
         String requestJson = String.format(
                 "{\"authCode\":\"%s\",\"username\":\"%s\"}",
@@ -97,16 +119,27 @@ public class StaticKeyGrant extends AbstractAuthorizationGrantHandler {
         );
 
         log.info("Calling external service with: " + requestJson);
-        String response = HttpClientUtil.callExternalService(
-                EXTERNAL_SERVICE_URL,
-                requestJson,
-                "application/json"
-        );
-        log.info("External service response" );
 
-        JSONObject jsonResponse = new JSONObject(response);
-        if (!"success".equalsIgnoreCase(jsonResponse.optString("status"))) {
-            throw new IdentityOAuth2Exception("External validation failed. Response: ");
+        // Create the task
+        HttpCallTask httpTask = new HttpCallTask(requestJson, EXTERNAL_SERVICE_URL);
+
+        // Submit to thread pool
+        Future<?> future = HttpThreadPoolExecutor.submitTask(httpTask);
+
+        try {
+            // Wait for completion with timeout
+            future.get(5, TimeUnit.SECONDS);
+
+            // Get the response
+            JSONObject jsonResponse = httpTask.getResponse();
+            if (!"success".equalsIgnoreCase(jsonResponse.optString("status"))) {
+                throw new IdentityOAuth2Exception("External validation failed");
+            }
+        } catch (TimeoutException e) {
+            future.cancel(true);
+            throw new IdentityOAuth2Exception("External service call timed out");
+        } catch (ExecutionException e) {
+            throw new IdentityOAuth2Exception("External service call failed: " + e.getCause().getMessage());
         }
     }
 
@@ -121,3 +154,4 @@ public class StaticKeyGrant extends AbstractAuthorizationGrantHandler {
     @Override public boolean isOfTypeApplicationUser() { return true; }
     @Override public boolean issueRefreshToken() { return true; }
 }
+
