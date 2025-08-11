@@ -6,6 +6,7 @@ import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.oltu.oauth2.common.error.OAuthError;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.validators.AbstractValidator;
+
 import javax.servlet.http.HttpServletRequest;
 
 public class StaticKeyGrantValidator extends AbstractValidator<HttpServletRequest> {

@@ -9,7 +9,6 @@ import java.io.IOException;
 
 public class HttpCallTask implements Runnable {
     private static final Log log = LogFactory.getLog(HttpCallTask.class);
-
     private final String requestJson;
     private final String serviceUrl;
     private JSONObject response;
@@ -37,6 +36,7 @@ public class HttpCallTask implements Runnable {
             this.response = new JSONObject(responseStr);
             log.info("Received response from {}: {}");
         } catch (IOException e) {
+            //TODO: check what is exception changing is and what are the beneficent of it
             this.exception = e;
             log.error("HTTP call to {} failed due to I/O error: {}");
         } catch (JSONException e) {
@@ -53,8 +53,13 @@ public class HttpCallTask implements Runnable {
             throw exception;
         }
         if (response == null) {
-            throw new IllegalStateException("HTTP call completed without exception, but response is null. This indicates an internal logic error.");
+            throw new IllegalStateException(
+                    "HTTP call completed without exception, but response is null. " +
+                            "This indicates an internal logic error.");
         }
         return response;
     }
 }
+
+
+

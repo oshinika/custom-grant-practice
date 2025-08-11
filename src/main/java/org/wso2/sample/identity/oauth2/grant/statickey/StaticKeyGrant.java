@@ -1,13 +1,16 @@
 package org.wso2.sample.identity.oauth2.grant.statickey;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.AuthenticationFailedException;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenReqDTO;
+import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenRespDTO;
 import org.wso2.carbon.identity.oauth2.model.RequestParameter;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.AbstractAuthorizationGrantHandler;
@@ -15,6 +18,10 @@ import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.json.JSONObject;
+//import org.wso2.sample.identity.oauth2.grant.statickey.model.ExternalServiceResponse;
+
+import java.time.Instant;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 import java.io.IOException;
@@ -25,6 +32,8 @@ public class StaticKeyGrant extends AbstractAuthorizationGrantHandler {
     public static final String CUSTOM_GRANT_TYPE_IDENTIFIER = "static_key";
     private static final String VALID_STATIC_KEY = "my_json_secret_key";
     static final String EXTERNAL_SERVICE_URL = "https://static-key.free.beeceptor.com";
+    private static final long CACHE_EXPIRY_MS = 300000;
+    private static final String CACHE_PREFIX = "STATIC_KEY_";
 
     @Override
     public boolean validateGrant(OAuthTokenReqMessageContext context) throws IdentityOAuth2Exception {
@@ -90,49 +99,34 @@ public class StaticKeyGrant extends AbstractAuthorizationGrantHandler {
         }
     }
 
-//    private void validateWithExternalService(StaticKeyGrantRequest request) throws Exception {
-//        String requestJson = String.format(
-//                "{\"authCode\":\"%s\",\"username\":\"%s\"}",
-//                request.getAuthCode(),
-//                request.getUsername()
-//        );
-//
-//        log.info("Calling external service with: " + requestJson);
-//        String response = HttpClientUtil.callExternalService(
-//                EXTERNAL_SERVICE_URL,
-//                requestJson,
-//                "application/json"
-//        );
-//        log.info("External service response" );
-//
-//        JSONObject jsonResponse = new JSONObject(response);
-//        if (!"success".equalsIgnoreCase(jsonResponse.optString("status"))) {
-//            throw new IdentityOAuth2Exception("External validation failed. Response: ");
-//        }
-//    }
-
     private void validateWithExternalService(StaticKeyGrantRequest request) throws Exception {
+        StaticKeyCacheKey cacheKey = new StaticKeyCacheKey(request.getAuthCode(), request.getUsername());
+        StaticKeyCacheEntry cachedEntry = StaticKeyCache.getInstance().getFromCache(cacheKey);
+
+        if (cachedEntry != null && "success".equalsIgnoreCase(cachedEntry.getResponse().optString("status"))) {
+            return;
+        }
+
         String requestJson = String.format(
                 "{\"authCode\":\"%s\",\"username\":\"%s\"}",
                 request.getAuthCode(),
                 request.getUsername()
         );
 
-        log.info("Calling external service with: " + requestJson);
-
-        // Create the task
         HttpCallTask httpTask = new HttpCallTask(requestJson, EXTERNAL_SERVICE_URL);
-
-        // Submit to thread pool
+        //TODO: why use Future in here? what are the benefits?
         Future<?> future = HttpThreadPoolExecutor.submitTask(httpTask);
 
         try {
-            // Wait for completion with timeout
             future.get(5, TimeUnit.SECONDS);
-
-            // Get the response
             JSONObject jsonResponse = httpTask.getResponse();
-            if (!"success".equalsIgnoreCase(jsonResponse.optString("status"))) {
+
+            if ("success".equalsIgnoreCase(jsonResponse.optString("status"))) {
+                StaticKeyCache.getInstance().addToCache(
+                        cacheKey,
+                        new StaticKeyCacheEntry(jsonResponse, CACHE_EXPIRY_MS)
+                );
+            } else {
                 throw new IdentityOAuth2Exception("External validation failed");
             }
         } catch (TimeoutException e) {
@@ -143,15 +137,33 @@ public class StaticKeyGrant extends AbstractAuthorizationGrantHandler {
         }
     }
 
+
+
+
+
     private void setAuthenticatedUser(OAuthTokenReqMessageContext context, String username) {
         AuthenticatedUser authenticatedUser = AuthenticatedUser.createLocalAuthenticatedUserFromSubjectIdentifier(
-                MultitenantUtils.getTenantAwareUsername(username)
-        );
+                MultitenantUtils.getTenantAwareUsername(username));
         context.setAuthorizedUser(authenticatedUser);
     }
 
-    @Override public boolean validateScope(OAuthTokenReqMessageContext tokReqCtx) { return true; }
-    @Override public boolean isOfTypeApplicationUser() { return true; }
-    @Override public boolean issueRefreshToken() { return true; }
+    @Override
+    public boolean validateScope(OAuthTokenReqMessageContext tokReqCtx) {
+        return true;
+    }
+
+    @Override
+    public boolean isOfTypeApplicationUser() {
+        return true;
+    }
+
+    @Override
+    public boolean issueRefreshToken() {
+        return true;
+    }
 }
+
+
+
+
 

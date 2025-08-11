@@ -1,6 +1,10 @@
 package org.wso2.sample.identity.oauth2.grant.statickey;
+import java.io.Serializable;
+//TODO: Why implement Serializable interface
+public class StaticKeyGrantRequest implements Serializable {
 
-public class StaticKeyGrantRequest {
+    private static final long serialVersionUID = 1L;
+
     private String authCode;
     private String username;
     private String cifNo;
@@ -9,6 +13,7 @@ public class StaticKeyGrantRequest {
     private String mobileNo;
     private String authType;
     private String authDescription;
+
 
     public StaticKeyGrantRequest(String authCode, String username, String cifNo, String omniId,
                                  String stanId, String mobileNo, String authType, String authDescription) {
@@ -22,33 +27,73 @@ public class StaticKeyGrantRequest {
         this.authDescription = authDescription;
     }
 
-   public StaticKeyGrantRequest() {
+    public StaticKeyGrantRequest() {
 
-   }
+    }
 
 
-    public String getAuthCode() { return authCode; }
-    public void setAuthCode(String authCode) { this.authCode = authCode; }
+    public String getAuthCode() {
+        return authCode;
+    }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public void setAuthCode(String authCode) {
+        this.authCode = authCode;
+    }
 
-    public String getCifNo() { return cifNo; }
-    public void setCifNo(String cifNo) { this.cifNo = cifNo; }
+    public String getUsername() {
+        return username;
+    }
 
-    public String getOmniId() { return omniId; }
-    public void setOmniId(String omniId) { this.omniId = omniId; }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-    public String getStanId() { return stanId; }
-    public void setStanId(String stanId) { this.stanId = stanId; }
+    public String getCifNo() {
+        return cifNo;
+    }
 
-    public String getMobileNo() { return mobileNo; }
-    public void setMobileNo(String mobileNo) { this.mobileNo = mobileNo; }
+    public void setCifNo(String cifNo) {
+        this.cifNo = cifNo;
+    }
 
-    public String getAuthType() { return authType; }
-    public void setAuthType(String authType) { this.authType = authType; }
+    public String getOmniId() {
+        return omniId;
+    }
 
-    public String getAuthDescription() { return authDescription; }
-    public void setAuthDescription(String authDescription) { this.authDescription = authDescription; }
+    public void setOmniId(String omniId) {
+        this.omniId = omniId;
+    }
+
+    public String getStanId() {
+        return stanId;
+    }
+
+    public void setStanId(String stanId) {
+        this.stanId = stanId;
+    }
+
+    public String getMobileNo() {
+        return mobileNo;
+    }
+
+    public void setMobileNo(String mobileNo) {
+        this.mobileNo = mobileNo;
+    }
+
+    public String getAuthType() {
+        return authType;
+    }
+
+    public void setAuthType(String authType) {
+        this.authType = authType;
+    }
+
+    public String getAuthDescription() {
+        return authDescription;
+    }
+
+    public void setAuthDescription(String authDescription) {
+        this.authDescription = authDescription;
+    }
 
 }
